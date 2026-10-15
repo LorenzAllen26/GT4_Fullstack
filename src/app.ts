@@ -1,43 +1,28 @@
 import express, { type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import { authRouter } from "./routes/authRoutes"; // Updated import
-import { taskRouter } from "./routes/taskRoutes"; // Updated import
+import { connectDB } from "./config/db";
+import { authRouter } from "./routes/authRoutes";
+import { courseRouter } from "./routes/courseRoutes";
+import { taskRouter } from "./routes/taskRoutes";
 
 export const app = express();
 
-app.use(cors());
+app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
 app.use(express.json());
+
+// Serverless DB connection middleware
+app.use(async (_req: Request, _res: Response, next: NextFunction) => {
+  await connectDB();
+  next();
+});
 
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ ok: true, db: mongoose.connection.readyState === 1 });
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/courses", courseRouter);
 app.use("/api/tasks", taskRouter);
 
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    message: `No route for ${req.method} ${req.originalUrl}`,
-  });
-});
-
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  if (err instanceof mongoose.Error.ValidationError) {
-    res.status(400).json({
-      message: "Validation failed",
-      errors: Object.values(err.errors).map((e) => e.message),
-    });
-    return;
-  }
-
-  if (err instanceof mongoose.Error.CastError) {
-    res.status(400).json({
-      message: `"${err.value}" is not a valid id`,
-    });
-    return;
-  }
-
-  console.error(err);
-  res.status(500).json({ message: "Something went wrong" });
-});
+export default app;

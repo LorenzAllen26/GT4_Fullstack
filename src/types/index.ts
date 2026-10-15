@@ -1,5 +1,19 @@
 import type { Types } from "mongoose";
 
+// --- Course Types (Added for GT4 Part 2) ---
+export interface Course {
+  code: string;
+  title: string;
+  units: number;
+  semester: string;
+}
+
+export type CourseDoc = Pick<
+  Course,
+  "code" | "title" | "units" | "semester"
+>;
+
+// --- User Types ---
 export interface User {
   id: string;
   name: string;
@@ -12,7 +26,7 @@ export type UserDoc = Omit<User, "id"> & {
   password: string;
 };
 
-// Change 'Task' to your custom application resource
+// --- Task / Resource Types ---
 export interface Task {
   id: string;
   userId: string;
