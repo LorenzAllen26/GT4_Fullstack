@@ -17,6 +17,11 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
+// Redirect root domain (/) directly to courses endpoint
+app.get("/", (_req: Request, res: Response) => {
+  res.redirect("/api/courses");
+});
+
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ ok: true, db: mongoose.connection.readyState === 1 });
 });
