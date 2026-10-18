@@ -37,16 +37,16 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 
 // Redirect root domain (/) directly to items endpoint
 app.get("/", (_req: Request, res: Response) => {
-  res.redirect("/items");
+  res.redirect("/api/items");
 });
 
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ ok: true, db: mongoose.connection.readyState === 1 });
 });
 
-// Lost & Found API Routes
+// Lost & Found API Routes (Standardized under /api)
 app.use("/api/auth", authRouter);
-app.use("/items", itemRouter);
-app.use("/claims", claimRouter);
+app.use("/api/items", itemRouter);
+app.use("/api/claims", claimRouter);
 
 export default app;
