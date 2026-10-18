@@ -45,12 +45,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/items", itemRouter);
 app.use("/api/claims", claimRouter);
 
-// Fallback route for items
-app.get("/items", (_req: Request, res: Response) => {
-  res.redirect("/api/items");
-});
-
-// Root redirect
+// Root redirect to items
 app.get("/", (_req: Request, res: Response) => {
   res.redirect("/api/items");
 });
