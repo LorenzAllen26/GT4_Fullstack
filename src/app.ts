@@ -14,11 +14,14 @@ const allowedOrigins = [
   "https://lorenz-allen26-itelect4-project-it-4-b-main2-hd26-64t465a5r.vercel.app",
 ];
 
-// 1. CORS Configuration
+// 1. Body Parser (Must be before routes)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 2. CORS Configuration
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl), allowed origins, or Vercel preview URLs
       if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || process.env.CORS_ORIGIN === "*") {
         callback(null, true);
       } else {
@@ -29,9 +32,7 @@ app.use(
   })
 );
 
-app.use(express.json());
-
-// 2. Safe Serverless DB Connection Middleware
+// 3. Safe Serverless DB Connection Middleware
 app.use(async (_req: Request, res: Response, next: NextFunction) => {
   try {
     await connectDB();
@@ -42,24 +43,34 @@ app.use(async (_req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// 3. Health Check
+// 4. Health Check
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ ok: true, db: mongoose.connection.readyState === 1 });
 });
 
-// 4. Lost & Found API Routes
+// 5. Lost & Found API Routes
 app.use("/api/auth", authRouter);
 app.use("/api/items", itemRouter);
 app.use("/api/claims", claimRouter);
 
-// 5. Root Redirect
+// 6. Root Redirect
 app.get("/", (_req: Request, res: Response) => {
   res.redirect("/api/items");
 });
 
-// 6. 404 Fallback for Unmatched Routes
+// 7. 404 Fallback for Unmatched Routes
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Route not found" });
+});
+
+// 8. Global Error Handler (Catches Mongoose Validation Errors)
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("Global Error Handler caught:", err);
+  const statusCode = err.statusCode || 400;
+  res.status(statusCode).json({
+    message: err.message || "An error occurred",
+    error: err.errors || err,
+  });
 });
 
 export default app;
