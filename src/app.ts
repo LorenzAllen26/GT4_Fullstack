@@ -40,12 +40,17 @@ app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ ok: true, db: mongoose.connection.readyState === 1 });
 });
 
-// Lost & Found API Routes (Must have /api prefix)
+// Lost & Found API Routes
 app.use("/api/auth", authRouter);
 app.use("/api/items", itemRouter);
 app.use("/api/claims", claimRouter);
 
-// Redirect root domain to /api/items
+// Fallback route for items
+app.get("/items", (_req: Request, res: Response) => {
+  res.redirect("/api/items");
+});
+
+// Root redirect
 app.get("/", (_req: Request, res: Response) => {
   res.redirect("/api/items");
 });
