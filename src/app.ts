@@ -14,10 +14,12 @@ const allowedOrigins = [
   "https://lorenz-allen26-itelect4-project-it-4-b-main2-hd26-64t465a5r.vercel.app",
 ];
 
+// 1. CORS Configuration
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || process.env.CORS_ORIGIN === "*") {
+      // Allow requests with no origin (mobile apps, curl), allowed origins, or Vercel preview URLs
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || process.env.CORS_ORIGIN === "*") {
         callback(null, true);
       } else {
         callback(null, true);
@@ -29,25 +31,35 @@ app.use(
 
 app.use(express.json());
 
-// Serverless DB connection middleware
-app.use(async (_req: Request, _res: Response, next: NextFunction) => {
-  await connectDB();
-  next();
+// 2. Safe Serverless DB Connection Middleware
+app.use(async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database connection failed:", error);
+    res.status(500).json({ error: "Failed to connect to database" });
+  }
 });
 
-// Health check endpoint
+// 3. Health Check
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ ok: true, db: mongoose.connection.readyState === 1 });
 });
 
-// Lost & Found API Routes
+// 4. Lost & Found API Routes
 app.use("/api/auth", authRouter);
 app.use("/api/items", itemRouter);
 app.use("/api/claims", claimRouter);
 
-// Root redirect to items
+// 5. Root Redirect
 app.get("/", (_req: Request, res: Response) => {
   res.redirect("/api/items");
+});
+
+// 6. 404 Fallback for Unmatched Routes
+app.use((_req: Request, res: Response) => {
+  res.status(404).json({ error: "Route not found" });
 });
 
 export default app;
