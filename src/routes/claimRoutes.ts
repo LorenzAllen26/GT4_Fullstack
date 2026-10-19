@@ -7,9 +7,9 @@ export const claimRouter = Router();
 claimRouter.get("/", async (_req: Request, res: Response) => {
   try {
     const claims = await Claim.find().sort({ createdAt: -1 });
-    res.json(claims);
+    res.json({ success: true, data: claims });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching claims" });
+    res.status(500).json({ success: false, message: "Error fetching claims" });
   }
 });
 
@@ -18,12 +18,12 @@ claimRouter.get("/:id", async (req: Request, res: Response) => {
   try {
     const claim = await Claim.findById(req.params.id);
     if (!claim) {
-      res.status(404).json({ message: "Claim not found" });
+      res.status(404).json({ success: false, message: "Claim not found" });
       return;
     }
-    res.json(claim);
+    res.json({ success: true, data: claim });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching claim" });
+    res.status(500).json({ success: false, message: "Error fetching claim" });
   }
 });
 
@@ -32,9 +32,9 @@ claimRouter.post("/", async (req: Request, res: Response) => {
   try {
     const newClaim = new Claim(req.body);
     const savedClaim = await newClaim.save();
-    res.status(201).json(savedClaim);
+    res.status(201).json({ success: true, data: savedClaim });
   } catch (error) {
-    res.status(400).json({ message: "Error creating claim" });
+    res.status(400).json({ success: false, message: "Error creating claim" });
   }
 });
 
@@ -47,11 +47,13 @@ claimRouter.patch("/:id", async (req: Request, res: Response) => {
       { new: true }
     );
     if (!updatedClaim) {
-      res.status(404).json({ message: "Claim not found" });
+      res.status(404).json({ success: false, message: "Claim not found" });
       return;
     }
-    res.json(updatedClaim);
+    res.json({ success: true, data: updatedClaim });
   } catch (error) {
-    res.status(400).json({ message: "Error updating claim" });
+    res.status(400).json({ success: false, message: "Error updating claim" });
   }
 });
+
+export default claimRouter;

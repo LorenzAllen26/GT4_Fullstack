@@ -14,7 +14,7 @@ const allowedOrigins = [
   "https://lorenz-allen26-itelect4-project-it-4-b-main2-hd26-64t465a5r.vercel.app",
 ];
 
-// 1. Body Parser (Must be before routes)
+// 1. Body Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -22,7 +22,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app") || process.env.CORS_ORIGIN === "*") {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app") ||
+        process.env.CORS_ORIGIN === "*"
+      ) {
         callback(null, true);
       } else {
         callback(null, true);
@@ -32,20 +37,24 @@ app.use(
   })
 );
 
-// 3. Safe Serverless DB Connection Middleware
+// 3. Database Connection Middleware
 app.use(async (_req: Request, res: Response, next: NextFunction) => {
   try {
     await connectDB();
     next();
   } catch (error) {
     console.error("Database connection failed:", error);
-    res.status(500).json({ error: "Failed to connect to database" });
+    res.status(500).json({ success: false, message: "Failed to connect to database" });
   }
 });
 
-// 4. Health Check
+// 4. Health Check Endpoint
 app.get("/api/health", (_req: Request, res: Response) => {
-  res.json({ ok: true, db: mongoose.connection.readyState === 1 });
+  res.json({
+    success: true,
+    ok: true,
+    dbConnected: mongoose.connection.readyState === 1,
+  });
 });
 
 // 5. Lost & Found API Routes
@@ -60,15 +69,16 @@ app.get("/", (_req: Request, res: Response) => {
 
 // 7. 404 Fallback for Unmatched Routes
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({ error: "Route not found" });
+  res.status(404).json({ success: false, message: "Route not found" });
 });
 
-// 8. Global Error Handler (Catches Mongoose Validation Errors)
+// 8. Global Error Handler
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Global Error Handler caught:", err);
-  const statusCode = err.statusCode || 400;
+  const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
-    message: err.message || "An error occurred",
+    success: false,
+    message: err.message || "An error occurred on the server",
     error: err.errors || err,
   });
 });
