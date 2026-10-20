@@ -11,9 +11,17 @@ export function connectDB(): Promise<typeof mongoose> {
     );
   }
 
+  // If already connected, return existing connection
+  if (mongoose.connection.readyState === 1) {
+    return Promise.resolve(mongoose);
+  }
+
   if (connection === null) {
     connection = mongoose
-      .connect(uri, { serverSelectionTimeoutMS: 5000 })
+      .connect(uri, {
+        serverSelectionTimeoutMS: 5000,
+        bufferCommands: false, // Prevents queries from hanging indefinitely on Vercel
+      })
       .then((m) => {
         console.log("MongoDB connected:", m.connection.name);
         return m;
