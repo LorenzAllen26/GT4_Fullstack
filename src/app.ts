@@ -11,7 +11,7 @@ export const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "https://lorenz-allen26-itelect4-project-it-4-b-main2-hd26-64t465a5r.vercel.app",
+  "https://lorenz-allen26-itelect4-project-it-seven.vercel.app",
 ];
 
 // 1. Body Parser
@@ -30,7 +30,7 @@ app.use(
       ) {
         callback(null, true);
       } else {
-        callback(null, true);
+        callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
