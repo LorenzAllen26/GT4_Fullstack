@@ -29,10 +29,16 @@ app.use(
 
 app.use(express.json());
 
-// Serverless DB connection middleware
+// Serverless DB connection middleware with error catching
 app.use(async (_req: Request, _res: Response, next: NextFunction) => {
-  await connectDB();
-  next();
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database connection error in middleware:", error);
+    // Proceed so health routes or error handlers can send proper response
+    next();
+  }
 });
 
 // Redirect root domain (/) directly to items endpoint
@@ -40,8 +46,14 @@ app.get("/", (_req: Request, res: Response) => {
   res.redirect("/items");
 });
 
+// Standardized health check endpoint
 app.get("/api/health", (_req: Request, res: Response) => {
-  res.json({ ok: true, db: mongoose.connection.readyState === 1 });
+  const isConnected = mongoose.connection.readyState === 1;
+  res.json({ 
+    success: true, 
+    ok: true, 
+    dbConnected: isConnected 
+  });
 });
 
 // Lost & Found API Routes
