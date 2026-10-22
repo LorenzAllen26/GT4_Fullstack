@@ -8,8 +8,12 @@ itemRouter.get("/", async (_req: Request, res: Response) => {
   try {
     const items = await Item.find();
     res.json(items);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching items" });
+  } catch (error: any) {
+    console.error("Error fetching items:", error);
+    res.status(500).json({ 
+      message: "Error fetching items", 
+      error: error?.message || error 
+    });
   }
 });
 
@@ -19,8 +23,12 @@ itemRouter.get("/:id", async (req: Request, res: Response) => {
     const item = await Item.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Item not found" });
     res.json(item);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching item" });
+  } catch (error: any) {
+    console.error("Error fetching item:", error);
+    res.status(500).json({ 
+      message: "Error fetching item", 
+      error: error?.message || error 
+    });
   }
 });
 
@@ -30,8 +38,12 @@ itemRouter.post("/", async (req: Request, res: Response) => {
     const newItem = new Item(req.body);
     const savedItem = await newItem.save();
     res.status(201).json(savedItem);
-  } catch (error) {
-    res.status(400).json({ message: "Error creating item" });
+  } catch (error: any) {
+    console.error("Error creating item:", error);
+    res.status(400).json({ 
+      message: "Error creating item", 
+      error: error?.message || error 
+    });
   }
 });
 
@@ -44,7 +56,11 @@ itemRouter.patch("/:id", async (req: Request, res: Response) => {
       { new: true }
     );
     res.json(updatedItem);
-  } catch (error) {
-    res.status(400).json({ message: "Error updating item" });
+  } catch (error: any) {
+    console.error("Error updating item:", error);
+    res.status(400).json({ 
+      message: "Error updating item", 
+      error: error?.message || error 
+    });
   }
 });

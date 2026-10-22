@@ -21,4 +21,5 @@ const ItemSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-export const Item = mongoose.model<IItem>("Item", ItemSchema);
+// Reuse model if already registered to prevent OverwriteModelError in serverless environments
+export const Item = mongoose.models.Item || mongoose.model<IItem>("Item", ItemSchema);
