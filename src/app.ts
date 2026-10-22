@@ -5,6 +5,7 @@ import { connectDB } from "./config/db";
 import { authRouter } from "./routes/authRoutes";
 import { itemRouter } from "./routes/itemRoutes";
 import { claimRouter } from "./routes/claimRoutes";
+import { aiRouter } from "./routes/aiRoutes"; // GT5
 
 export const app = express();
 
@@ -60,5 +61,6 @@ app.get("/api/health", (_req: Request, res: Response) => {
 app.use("/api/auth", authRouter);
 app.use("/items", itemRouter);
 app.use("/claims", claimRouter);
+app.use("/api/ai", aiRouter); // GT5: the only route that talks to Gemini
 
 export default app;
