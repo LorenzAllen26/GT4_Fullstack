@@ -59,8 +59,16 @@ app.get("/api/health", (_req: Request, res: Response) => {
 
 // Lost & Found API Routes
 app.use("/api/auth", authRouter);
+app.use("/auth", authRouter);
+
+app.use("/api/items", itemRouter);
 app.use("/items", itemRouter);
+
+app.use("/api/claims", claimRouter);
 app.use("/claims", claimRouter);
-app.use("/api/ai", aiRouter); // GT5: the only route that talks to Gemini
+
+// Gemini AI Endpoint - Support both /ai and /api/ai
+app.use("/api/ai", aiRouter);
+app.use("/ai", aiRouter);
 
 export default app;
